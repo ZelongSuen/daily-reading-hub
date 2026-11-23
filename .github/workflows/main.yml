@@ -1,0 +1,18 @@
+name: Daily Fetcher
+on: { schedule: [ { cron: '30 15 * * *' } ], workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install feedparser requests beautifulsoup4
+      - run: python fetch_links.py
+      - run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add index.html reading_links_history.db
+          git commit -m "update" || exit 0
+          git push
